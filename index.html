@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Daily Expense Tracker</title>
+<style>
+:root{
+  --bg1: 10, 10, 14;
+  --bg2: 6, 6, 10;
+  --accent: 131,58,180;
+  --accent-2: 240,0,140;
+  --text: #e6f0ff;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family: 'Segoe UI', Arial, sans-serif;background:#000;}
+
+body{
+  background: radial-gradient(circle at 10% 20%, rgba(131,58,180,0.12), transparent 15%),
+              radial-gradient(circle at 90% 80%, rgba(240,0,140,0.08), transparent 15%),
+              linear-gradient(120deg, rgb(var(--bg1)), rgb(var(--bg2)));
+  color:var(--text);
+  transition:background 0.6s ease;
+  padding:30px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background-size:400% 400%;
+  animation: bgShift 15s ease-in-out infinite;
+}
+
+@keyframes bgShift{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+.container{
+  width: 780px;
+  max-width: 96%;
+  padding: 36px;
+  border-radius:18px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 0 40px rgba(var(--accent),0.14), inset 0 2px 0 rgba(255,255,255,0.03);
+  border: 1px solid rgba(var(--accent),0.22);
+  position:relative;
+  backdrop-filter: blur(8px) saturate(150%);
+  overflow:hidden;
+}
+
+.container::before{
+  content:'';
+  position:absolute;inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg, rgba(var(--accent),0.12), rgba(var(--accent-2),0.06));
+  mix-blend-mode:screen;
+  filter:blur(18px) saturate(150%);
+}
+
+h2{
+  margin:0 0 14px;
+  text-align:center;
+  font-size:28px;
+  letter-spacing:1px;
+  text-shadow:
+    0 0 8px rgba(var(--accent),0.95),
+    0 0 16px rgba(var(--accent-2),0.7);
+}
+
+input, select, button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:rgba(0,0,0,0.35);
+  color:var(--text);
+  outline:none;
+  transition:box-shadow .18s, border-color .18s, transform .08s;
+}
+
+.expense-item{
+  display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.02);
+  padding:14px;margin-top:8px;border-radius:10px;border-left:4px solid rgba(var(--accent),0.14);
+  box-shadow:0 6px 10px rgba(0,0,0,0.35);
+  color:var(--text);
+}
+input:focus, select:focus{
+  box-shadow:0 0 18px rgba(var(--accent),0.18), 0 0 8px rgba(var(--accent-2),0.12);
+  border-color: rgba(var(--accent),0.6);
+  transform:translateY(-1px);
+}
+
+button.add-btn{
+  background: linear-gradient(90deg, rgba(var(--accent),0.95), rgba(var(--accent-2),0.95));
+  color:#fff;border:none;font-weight:700;cursor:pointer;margin-top:12px;
+  box-shadow:0 6px 18px rgba(var(--accent),0.24), 0 0 40px rgba(var(--accent),0.12);
+}
+button.add-btn:hover{filter:brightness(1.05);transform:translateY(-2px)}
+
+.expense-list{margin-top:18px}
+.expense-item{
+  display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.02);
+  padding:10px;margin-top:8px;border-radius:10px;border-left:4px solid rgba(var(--accent),0.14);
+  box-shadow:0 6px 10px rgba(0,0,0,0.35);
+  color:var(--text);
+}
+.delete-btn{background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;cursor:pointer}
+.total{font-weight:800;margin-top:15px;text-align:right;font-size:16px}
+
+.container.pulse{animation:pulse .9s ease}
+@keyframes pulse{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+
+@media (max-width:900px){.container{width:92%;padding:26px}}
+@media (max-width:560px){.container{width:96%;padding:18px}}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Daily Expense Tracker</h2>
+
+  <input type="text" id="expenseName" placeholder="Expense Name">
+  <input type="number" id="expenseAmount" placeholder="Expense Amount">
+
+  <select id="expenseCategory">
+    <option value="">Select Category</option>
+    <option>Food</option>
+    <option>Travel</option>
+    <option>Shopping</option>
+    <option>Bills</option>
+    <option>Other</option>
+  </select>
+
+  <button class="add-btn" onclick="addExpense()">Add Expense</button>
+
+  <div class="expense-list" id="expenseList"></div>
+
+  <div class="total">Total: ₹<span id="totalAmount">0</span></div>
+</div>
+
+<script>
+// Electric-only neon palette
+document.documentElement.style.setProperty('--accent', '131,58,180');
+document.documentElement.style.setProperty('--accent-2', '240,0,140');
+
+let total = 0;
+
+function addExpense() {
+  let name = document.getElementById("expenseName").value;
+  let amount = document.getElementById("expenseAmount").value;
+  let category = document.getElementById("expenseCategory").value;
+
+  if (name === "" || amount === "" || category === "") {
+    alert("Please fill all fields!");
+    return;
+  }
+
+  amount = parseFloat(amount);
+
+  let expenseList = document.getElementById("expenseList");
+
+  let expenseItem = document.createElement("div");
+  expenseItem.className = "expense-item";
+
+  expenseItem.innerHTML = `
+    <span>${name} (${category}) - ₹${amount}</span>
+    <button class="delete-btn" onclick="deleteExpense(this, ${amount})">Delete</button>
+  `;
+
+  expenseList.appendChild(expenseItem);
+
+  total += amount;
+  updateTotal();
+
+  document.getElementById("expenseName").value = "";
+  document.getElementById("expenseAmount").value = "";
+  document.getElementById("expenseCategory").value = "";
+}
+
+function deleteExpense(button, amount) {
+  button.parentElement.remove();
+  total -= amount;
+  updateTotal();
+}
+
+function updateTotal() {
+  document.getElementById("totalAmount").innerText = total;
+}
+</script>
+
+</body>
+</html>
